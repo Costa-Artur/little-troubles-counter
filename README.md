@@ -1,5 +1,7 @@
 # Little Troubles — contador de mesa
 
+**Abrir o app:** https://costa-artur.github.io/little-troubles-counter/
+
 App para celular (PWA) para deixar no meio da mesa durante partidas de **Little Troubles TCG**, inspirado nos contadores de vida de Magic. Funciona offline e pode ser instalado na tela inicial.
 
 ## Como usar
