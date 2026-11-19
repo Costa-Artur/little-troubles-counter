@@ -26,6 +26,12 @@ Instale o app **Expo Go** no celular e leia o QR code que aparece no terminal (c
 
 Para testar no navegador: `npx expo start --web`.
 
+## Site (GitHub Pages)
+
+O mesmo app vira um site em https://costa-artur.github.io/little-troubles-counter/. A cada push na `main`, o GitHub Actions (`.github/workflows/pages.yml`) roda `npx expo export -p web` e publica a pasta `dist`. O caminho do site está em `app.json` (`experiments.baseUrl`), e os arquivos de instalação (manifest, ícones e o service worker para uso offline) ficam em `public/`.
+
+Para testar o site localmente: `npx expo export -p web` e sirva a pasta `dist` dentro de uma pasta `little-troubles-counter`.
+
 ## Publicar na Play Store
 
 A configuração já está pronta em `app.json` e `eas.json`:

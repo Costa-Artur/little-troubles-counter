@@ -22,6 +22,14 @@
       "predictiveBackGestureEnabled": false
     },
     "web": {
+      "name": "LT Counter",
+      "shortName": "LT Counter",
+      "description": "Table counter for Little Troubles TCG: Cookies, Fights Won and Goals.",
+      "lang": "en",
+      "themeColor": "#fdf4e3",
+      "backgroundColor": "#fdf4e3",
+      "bundler": "metro",
+      "output": "single",
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
@@ -35,6 +43,9 @@
           "backgroundColor": "#fdf4e3"
         }
       ]
-    ]
+    ],
+    "experiments": {
+      "baseUrl": "/little-troubles-counter"
+    }
   }
 }

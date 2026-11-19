@@ -2,11 +2,13 @@
 
 **Abrir o app:** https://costa-artur.github.io/little-troubles-counter/
 
-**App para Android/iOS (React Native):** veja a pasta [`mobile/`](mobile/README.md). Ela tem mais disposições de mesa (até 6 jogadores) e já está configurada para a Play Store.
+O site publica o app em React Native da pasta [`mobile/`](mobile/README.md) (versão web do Expo), em inglês, com 2 a 6 jogadores e disposições de mesa no estilo do Lotus. Ele é atualizado sozinho a cada push na `main` (GitHub Actions) e pode ser instalado na tela inicial. A mesma pasta gera o app Android para a Play Store.
 
-App para celular (PWA) para deixar no meio da mesa durante partidas de **Little Troubles TCG**, inspirado nos contadores de vida de Magic. Funciona offline e pode ser instalado na tela inicial.
+## Versão antiga (PWA em português)
 
-## Como usar
+Os arquivos na raiz (`index.html`, `style.css`, `app.js`, `sw.js`) são a primeira versão do contador, em HTML/JS puro. Ela não é mais publicada no site, mas continua aqui e pode ser aberta localmente.
+
+### Como usar (versão antiga)
 
 - Cada jogador tem um painel virado para o seu lado da mesa (2, 3 ou 4 jogadores).
 - **Cookies** (número grande, começa em 30): toque na metade direita para **+1** e na esquerda para **−1**. Segure para **±10**. Um indicador mostra a variação recente (ex.: `−7`).
@@ -17,7 +19,7 @@ App para celular (PWA) para deixar no meio da mesa durante partidas de **Little 
 - **Botão central**: sortear quem começa, dados D4 a D100, moeda, número de jogadores, cookies iniciais, nova partida e lembretes das regras.
 - A tela fica ligada enquanto o app está aberto (quando o navegador permite).
 
-## Rodar no computador
+### Rodar no computador (versão antiga)
 
 ```powershell
 python -m http.server 5173
@@ -25,7 +27,7 @@ python -m http.server 5173
 
 Depois abra http://localhost:5173.
 
-## Usar no celular
+### Usar no celular (versão antiga)
 
 O app é só um conjunto de arquivos estáticos (`index.html`, `style.css`, `app.js`, `sw.js`, `manifest.webmanifest`, `icons/`). Publique a pasta em um host HTTPS gratuito, por exemplo:
 

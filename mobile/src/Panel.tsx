@@ -169,7 +169,7 @@ export function Panel({ i, rot, flex }: { i: number; rot: Rot; flex: number }) {
             </View>
             </View>
 
-            <Fights i={i} c={c} width={wide ? Math.min(iw * 0.42, 240) : Math.min(iw * 0.76, 330)} btn={wide ? clampN(ih * 0.24, 32, 42) : fb} ih={wide ? ih * 1.6 : ih} over={over} flat={wide} />
+            <Fights i={i} c={c} width={wide ? Math.min(iw * 0.42, 240) : Math.min(iw * 0.86, 340)} btn={wide ? clampN(ih * 0.24, 32, 42) : fb} ih={wide ? ih * 1.6 : ih} over={over} flat={wide} />
           </View>
 
           <Pressable onPress={() => g.setDrawer(i, 'settings')} accessibilityLabel="Player options"
