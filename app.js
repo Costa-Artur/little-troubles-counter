@@ -430,6 +430,9 @@ $('#board').addEventListener('pointerdown', e => {
   const z = e.target.closest('.zone');
   if (!z) return;
   e.preventDefault();
+  // Segundo dedo (pinça/zoom) cancela tudo: antes ele substituía o toque anterior
+  // sem parar o timer, e o contador ficava repetindo para sempre.
+  if (hold) { endHold(false); return; }
   const i = +z.closest('.panel').dataset.i;
   const d = +z.dataset.d;
   try { z.setPointerCapture(e.pointerId); } catch {}
@@ -452,6 +455,8 @@ function endHold(apply) {
 }
 document.addEventListener('pointerup', () => endHold(true));
 document.addEventListener('pointercancel', () => endHold(false));
+addEventListener('blur', () => endHold(false));
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') endHold(false); });
 
 /* ---------------- Ações (cliques) ---------------- */
 

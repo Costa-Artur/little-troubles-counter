@@ -71,7 +71,7 @@ svg { display: block; }
 .panel.r180 { --rot: 180deg; }
 .panel.r270 { --rot: -90deg; }
 
-.zone { position: absolute; top: 0; bottom: 0; width: 50%; z-index: 1; transition: background .15s; }
+.zone { position: absolute; top: 0; bottom: 0; width: 50%; z-index: 1; transition: background .15s; touch-action: none; }
 .zone.l { left: 0; }
 .zone.r { right: 0; }
 .zone.press { background: rgba(255, 255, 255, .35); }
