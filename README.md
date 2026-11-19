@@ -2,6 +2,8 @@
 
 **Abrir o app:** https://costa-artur.github.io/little-troubles-counter/
 
+**App para Android/iOS (React Native):** veja a pasta [`mobile/`](mobile/README.md). Ela tem mais disposições de mesa (até 6 jogadores) e já está configurada para a Play Store.
+
 App para celular (PWA) para deixar no meio da mesa durante partidas de **Little Troubles TCG**, inspirado nos contadores de vida de Magic. Funciona offline e pode ser instalado na tela inicial.
 
 ## Como usar

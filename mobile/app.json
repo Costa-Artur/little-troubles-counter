@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "LT Counter",
+    "slug": "lt-counter",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#fdf4e3",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.costaartur.ltcounter"
+    },
+    "android": {
+      "package": "com.costaartur.ltcounter",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "backgroundColor": "#fdf4e3",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 160,
+          "resizeMode": "contain",
+          "backgroundColor": "#fdf4e3"
+        }
+      ]
+    ]
+  }
+}
