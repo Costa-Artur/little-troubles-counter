@@ -1,5 +1,5 @@
 // Service worker: deixa o app funcionando offline.
-const CACHE = 'lt-counter-v4';
+const CACHE = 'lt-counter-v13';
 const ASSETS = [
   './',
   './index.html',
