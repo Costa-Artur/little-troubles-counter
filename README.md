@@ -1,6 +1,6 @@
 # Little Troubles — contador de mesa
 
-**Abrir o app:** https://costa-artur.github.io/little-troubles-counter/
+**Abrir o app:** https://nickowolf.github.io/little-troubles-counter/
 
 O site publica o app em React Native da pasta [`mobile/`](mobile/README.md) (versão web do Expo), em inglês, com 2 a 6 jogadores e disposições de mesa no estilo do Lotus. Ele é atualizado sozinho a cada push na `main` (GitHub Actions) e pode ser instalado na tela inicial. A mesma pasta gera o app Android para a Play Store.
 
