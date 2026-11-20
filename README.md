@@ -4,6 +4,8 @@
 
 O site publica o app em React Native da pasta [`mobile/`](mobile/README.md) (versão web do Expo), em inglês, com 2 a 6 jogadores e disposições de mesa no estilo do Lotus. Ele é atualizado sozinho a cada push na `main` (GitHub Actions) e pode ser instalado na tela inicial. A mesma pasta gera o app Android para a Play Store.
 
+Para configurar a publicação Android pelo Expo e GitHub Actions, siga o [guia da Play Store](mobile/PUBLISHING.md).
+
 ## Versão antiga (PWA em português)
 
 Os arquivos na raiz (`index.html`, `style.css`, `app.js`, `sw.js`) são a primeira versão do contador, em HTML/JS puro. Ela não é mais publicada no site, mas continua aqui e pode ser aberta localmente.

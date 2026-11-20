@@ -34,41 +34,14 @@ Para testar o site localmente: `npx expo export -p web` e sirva a pasta `dist` d
 
 ## Publicar na Play Store
 
-A configuração já está pronta em `app.json` e `eas.json`:
+O passo a passo completo está em **[PUBLISHING.md](PUBLISHING.md)**: conta Google Play, conta de serviço, assinatura no Expo, secret do GitHub, primeiro envio e releases automáticas.
 
-- Pacote Android: `com.costaartur.ltcounter` (troque antes do primeiro envio se quiser outro; depois de publicado ele não muda mais).
-- Nome no aparelho: **LT Counter**. Versão `1.0.0`, `versionCode` 1, que sobe sozinho a cada build de produção.
-- Ícones (normal, adaptativo e monocromático), tela de abertura e ícone 512×512 da loja em `store/`.
-
-Passos:
-
-1. Crie uma conta gratuita em [expo.dev](https://expo.dev) e entre pelo terminal:
-   ```powershell
-   npx eas-cli@latest login
-   ```
-2. Ligue o projeto à sua conta (só na primeira vez):
-   ```powershell
-   npx eas-cli@latest init
-   ```
-3. Gere um APK de teste para instalar direto no celular:
-   ```powershell
-   npx eas-cli@latest build -p android --profile preview
-   ```
-4. Gere o pacote da loja (.aab):
-   ```powershell
-   npx eas-cli@latest build -p android --profile production
-   ```
-   O EAS cria e guarda a chave de assinatura do app para você.
-5. Na [Play Console](https://play.google.com/console) (conta de desenvolvedor do Google, taxa única), crie o app e **envie o primeiro .aab manualmente** em "Teste interno". O Google exige esse primeiro envio pela página.
-6. Envios seguintes podem ir pelo terminal com `npx eas-cli@latest submit -p android --profile production`. Antes, crie uma chave de conta de serviço do Google e configure-a no EAS (veja a documentação "Submit to Google Play" do Expo).
-
-### O que a Play Console vai pedir
-
-- **Política de privacidade**: o app não coleta nem envia dados (tudo fica no aparelho), mas a loja exige um link. Uma página simples (por exemplo no GitHub Pages) resolve.
-- **Segurança dos dados**: responda que nenhum dado é coletado nem compartilhado.
-- **Classificação indicativa**: questionário rápido.
-- **Página da loja**: ícone 512×512 (`store/play-store-icon-512.png`), imagem de destaque 1024×500 e pelo menos 2 capturas de tela do celular.
-- **Nome e marca**: "Little Troubles" é marca dos criadores do jogo. Para um app de fãs, deixe claro na descrição que é **não oficial**, ou peça autorização a eles.
+- Projeto Expo: `@wcrdesign/lt-counter`; pacote Android: `pet.nick.ltcounter`.
+- A CI em `.github/workflows/mobile.yml` verifica lint, TypeScript, dependências e bundle Android.
+- Depois de ativada, cada alteração em `mobile/` na `main` gera AAB e envia para **teste interno**; tags `android-vX.Y.Z` enviam para **produção**.
+- O modo manual `bootstrap` envia um rascunho inicial; `build-only` gera apenas o AAB.
+- O EAS gerencia o `versionCode` remotamente. A versão visível continua em `app.json`.
+- A automação depende de `EXPO_TOKEN` nos secrets do GitHub e de `PLAY_STORE_AUTOMATION_ENABLED=true` nas variáveis do repositório. As chaves Google e Android ficam no Expo.
 
 ## Estrutura
 

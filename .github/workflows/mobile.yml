@@ -1,0 +1,140 @@
+name: Android CI and Play Store
+
+on:
+  pull_request:
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/mobile.yml'
+  push:
+    branches: [main]
+    tags: ['android-v*']
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/mobile.yml'
+  workflow_dispatch:
+    inputs:
+      destination:
+        description: 'Build only, first draft, internal testing, or public production release'
+        required: true
+        default: bootstrap
+        type: choice
+        options:
+          - build-only
+          - bootstrap
+          - internal
+          - production
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Lint, types, and Android bundle
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: mobile
+    env:
+      CI: '1'
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npx expo install --check
+      - run: npx expo export --platform android
+
+  publish:
+    name: Build and submit Android
+    needs: check
+    # Enable automatic pushes/tags only after account and store setup is complete.
+    # Manual runs remain available for the first build and draft submission.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' && vars.PLAY_STORE_AUTOMATION_ENABLED == 'true')
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    concurrency:
+      group: android-play-store
+      cancel-in-progress: false
+    defaults:
+      run:
+        working-directory: mobile
+    env:
+      CI: '1'
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - name: Select destination and validate release
+        id: release
+        env:
+          REQUESTED_DESTINATION: ${{ inputs.destination }}
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          destination="${REQUESTED_DESTINATION:-internal}"
+          if [[ "$GITHUB_REF" == refs/tags/android-v* ]]; then
+            destination=production
+            version=$(node -p "require('./app.json').expo.version")
+            if [[ "$GITHUB_REF_NAME" != "android-v$version" ]]; then
+              echo "::error::The tag must be android-v$version to match mobile/app.json."
+              exit 1
+            fi
+          fi
+          if [[ "$destination" == production ]]; then
+            git merge-base --is-ancestor HEAD origin/main || {
+              echo '::error::Production releases must use a commit already on main.'
+              exit 1
+            }
+          fi
+          if [[ -z "$EXPO_TOKEN" ]]; then
+            echo '::error::Configure the EXPO_TOKEN repository secret. See mobile/PUBLISHING.md.'
+            exit 1
+          fi
+          node -e "const app = require('./app.json').expo; if (!app.extra?.eas?.projectId) { console.error('Run npx eas-cli@latest init in mobile/ and commit app.json. See mobile/PUBLISHING.md.'); process.exit(1); }"
+          echo "destination=$destination" >> "$GITHUB_OUTPUT"
+      - run: npm ci
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - name: Build signed AAB and wait for completion
+        id: build
+        shell: bash
+        run: |
+          set -euo pipefail
+          eas build --platform android --profile production --non-interactive --wait --json > "$RUNNER_TEMP/android-build.json"
+          node <<'NODE'
+          const fs = require('node:fs');
+          const builds = JSON.parse(fs.readFileSync(`${process.env.RUNNER_TEMP}/android-build.json`, 'utf8'));
+          const build = builds.find(item => item.platform === 'ANDROID');
+          if (!build?.id || build.status !== 'FINISHED') {
+            throw new Error('EAS did not return a finished Android build.');
+          }
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `id=${build.id}\n`);
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,
+            `### Android build\n\nBuild ID: ${build.id}\n\n[AAB](${build.artifacts.buildUrl})\n`);
+          NODE
+      - name: Submit this build to Google Play and wait for completion
+        if: steps.release.outputs.destination != 'build-only'
+        env:
+          BUILD_ID: ${{ steps.build.outputs.id }}
+          SUBMIT_PROFILE: ${{ steps.release.outputs.destination }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          eas submit --platform android --profile "$SUBMIT_PROFILE" --id "$BUILD_ID" --non-interactive --wait
+          echo "Submitted build $BUILD_ID using profile $SUBMIT_PROFILE. Google Play review and publishing settings still apply." >> "$GITHUB_STEP_SUMMARY"

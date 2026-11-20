@@ -2,6 +2,7 @@
   "expo": {
     "name": "LT Counter",
     "slug": "lt-counter",
+    "owner": "wcrdesign",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -9,11 +10,10 @@
     "backgroundColor": "#fdf4e3",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.costaartur.ltcounter"
+      "bundleIdentifier": "pet.nick.ltcounter"
     },
     "android": {
-      "package": "com.costaartur.ltcounter",
-      "versionCode": 1,
+      "package": "pet.nick.ltcounter",
       "adaptiveIcon": {
         "backgroundColor": "#fdf4e3",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -46,6 +46,11 @@
     ],
     "experiments": {
       "baseUrl": "/little-troubles-counter"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "4b9ca154-9f9f-433f-946e-cdcdf9b911aa"
+      }
     }
   }
 }

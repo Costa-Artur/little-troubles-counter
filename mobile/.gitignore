@@ -36,6 +36,13 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
+# Store credentials (keep Google JSON keys outside the repository)
+credentials.json
+google-service-account*.json
+play-store-service-account*.json
+/nickpet-1683209554021-ec33cc17667d.json
+*.keystore
+
 # generated native folders
 /ios
 /android
