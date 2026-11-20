@@ -2,7 +2,9 @@
 
 **Abrir o app:** https://nickowolf.github.io/little-troubles-counter/
 
-O site publica o app em React Native da pasta [`mobile/`](mobile/README.md) (versão web do Expo), em inglês, com 2 a 6 jogadores e disposições de mesa no estilo do Lotus. Ele é atualizado sozinho a cada push na `main` (GitHub Actions) e pode ser instalado na tela inicial. A mesma pasta gera o app Android para a Play Store.
+O site publica o app em React Native da pasta [`mobile/`](mobile/README.md) (versão web do Expo), em inglês, com 2 a 6 jogadores e disposições de mesa no estilo do Lotus. Ele é atualizado sozinho a cada push na `prod` (GitHub Actions) e pode ser instalado na tela inicial. A mesma pasta gera o app Android para a Play Store.
+
+As branches `dev`, `alpha` e `prod` publicam respectivamente no teste interno, teste fechado e produção da Play Store. A branch padrão é `dev`; promova mudanças por merge ou pull request de `dev` para `alpha` e de `alpha` para `prod`.
 
 Para configurar a publicação Android pelo Expo e GitHub Actions, siga o [guia da Play Store](mobile/PUBLISHING.md).
 

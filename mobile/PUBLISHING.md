@@ -8,18 +8,20 @@ O workflow está em [`.github/workflows/mobile.yml`](../.github/workflows/mobile
 
 | Evento | Resultado |
 | --- | --- |
-| Pull request que altera `mobile/` ou o workflow | Lint, TypeScript, compatibilidade de dependências Expo e exportação do bundle Android; sem credenciais. |
-| Push na `main` que altera esses arquivos | Mesmas verificações; com a automação ativada, gera AAB e envia para **teste interno**. |
-| Push da tag `android-vX.Y.Z` | Verifica, gera AAB e envia para **produção**; exige automação ativada, versão igual à de `app.json` e commit presente na `main`. |
+| Pull request para `dev`, `alpha` ou `prod` que altera `mobile/` ou o workflow | Lint, TypeScript, compatibilidade de dependências Expo e exportação do bundle Android; sem credenciais. |
+| Qualquer push em `dev` | Verifica, gera AAB e envia para **teste interno** (`track: internal`). |
+| Qualquer push em `alpha` | Verifica, gera AAB e envia para **teste fechado** (`track: alpha`). |
+| Qualquer push em `prod` | Verifica, gera AAB e envia para **produção** (`track: production`); também publica o site no GitHub Pages. |
 | Execução manual: `verify` | Verifica a autenticação do token Expo e o acesso ao projeto, sem gerar AAB nem enviar à loja. |
 | Execução manual: `build-only` | Gera AAB assinado, sem enviar à loja. |
-| Execução manual: `bootstrap` | Gera AAB e envia um **rascunho no teste interno**, para configurar o primeiro lançamento. |
-| Execução manual: `internal` | Gera AAB e disponibiliza para os testadores internos configurados na Play Console. |
-| Execução manual: `production` | Gera AAB e envia para produção; o commit precisa estar na `main`. |
+| Execução manual: `bootstrap` na branch `dev` | Gera AAB e envia um **rascunho no teste interno**, para configurar o primeiro lançamento. |
+| Execução manual: `release` | Gera AAB e envia ao canal da branch selecionada: `dev` → interno, `alpha` → fechado, `prod` → produção. |
 
-As execuções manuais funcionam antes de ativar os pushes automáticos. Para elas, selecione a branch `main` no GitHub. Em uma tag `android-v*`, o destino é sempre produção. O workflow não publica a partir de pull requests.
+`dev` é a branch padrão do repositório. A antiga `main` foi renomeada para `prod`, preservando o histórico. Desenvolva em `dev`, promova para `alpha` e depois para `prod` por merge ou pull request. Tags não disparam publicação. Todos os canais usam o pacote `pet.nick.ltcounter`, as mesmas credenciais e o contador remoto de versões do EAS.
 
-Os envios compartilham um grupo de concorrência para evitar publicações simultâneas. O GitHub pode substituir uma execução pendente por uma mais recente; a CI não é uma fila que garante a publicação de cada commit. Evite disparar várias releases enquanto outra está pendente.
+Nas execuções manuais, selecione `dev`, `alpha` ou `prod`. O modo padrão é `verify`; `release` respeita o canal da branch e `bootstrap` só funciona em `dev`. Os modos manuais funcionam mesmo com os pushes automáticos pausados. Pull requests executam somente a CI; a publicação começa após o merge/push na branch de destino.
+
+Cada branch tem seu próprio grupo de concorrência, para que um push em `prod` não substitua uma execução pendente de `alpha` ou `dev`. Dentro da mesma branch, o GitHub pode substituir uma execução pendente por uma mais recente. O build já iniciado não é cancelado automaticamente.
 
 ## 1. Vincular o projeto ao Expo
 
@@ -60,6 +62,9 @@ O `eas.json` usa `appVersionSource: remote` e `autoIncrement: true`. O EAS contr
 3. Preencha a página da loja, os dados de contato, política de privacidade, segurança dos dados, acesso ao app, anúncios, público-alvo e classificação indicativa conforme o comportamento real do aplicativo.
 4. Prepare o ícone 512 × 512 (já existe em `store/play-store-icon-512.png`), a imagem de destaque 1024 × 500 e as capturas de tela exigidas pela loja. A política de privacidade precisa estar em uma URL pública.
 5. Configure os testadores e o link de adesão em **Teste interno**. O primeiro rascunho precisa ser concluído na Play Console para ficar disponível aos testadores.
+6. Em **Teste fechado**, configure os testadores e os países do canal **Alpha**, cujo identificador da API é `alpha`. Esse canal já existe para o LT Counter. A branch `alpha` envia para ele; canais personalizados com outro identificador precisam de configuração correspondente no serviço de envio.
+
+O primeiro AAB do LT Counter já foi enviado com sucesso como rascunho no teste interno. Conclua as tarefas do app e essa versão na Play Console para permitir os próximos envios com `releaseStatus: completed`. Configure também a disponibilidade do teste fechado e o acesso à produção antes de promover mudanças para esses canais.
 
 Contas pessoais novas podem precisar de teste fechado antes de pedir acesso à produção. Confira os requisitos exibidos na sua Play Console: **teste interno não substitui teste fechado**. A CI pode enviar para teste interno enquanto o acesso à produção ainda não estiver liberado. [Requisitos de testes do Google](https://support.google.com/googleplay/android-developer/answer/14151465).
 
@@ -87,39 +92,52 @@ A chave fica armazenada no Expo, assim como o keystore. Não é necessário colo
 1. Crie um [token de acesso Expo](https://expo.dev/settings/access-tokens) para uma conta com acesso à organização `wcrdesign`.
 2. No [repositório GitHub](https://github.com/nickowolf/little-troubles-counter/settings/secrets/actions), abra **Settings → Secrets and variables → Actions → Secrets** e crie o secret **`EXPO_TOKEN`** com esse token.
 3. Faça commit e push da configuração, incluindo `app.json` com o `projectId` real, `eas.json` e o workflow. O workflow só aparece no menu de execução manual depois de chegar à branch padrão. Execute primeiro o destino `verify` para conferir a autenticação e o acesso do token ao projeto Expo.
-4. Abra **Actions → Android CI and Play Store → Run workflow**, selecione `main` e o destino **`bootstrap`**. O link do AAB aparece no resumo da execução; o log do EAS Submit informa o resultado do envio.
+4. Para uma configuração inicial, abra **Actions → Android CI and Play Store → Run workflow**, selecione `dev` e o destino **`bootstrap`**. No LT Counter esse primeiro rascunho já foi enviado; use `verify` para conferir o token ou `release` para uma nova versão no canal da branch. O link do AAB aparece no resumo da execução; o log do EAS Submit informa o resultado do envio.
 5. Na Play Console, confira o rascunho, conclua as tarefas de configuração e publique a release de teste interno para os testadores.
 
-A documentação atual do Expo permite o primeiro envio com EAS Submit. Se a Play Console exigir um primeiro envio manual ou se você preferir fazê-lo pela interface, execute o destino **`build-only`**, baixe o AAB pelo resumo da execução, envie-o em **Teste interno → Criar versão** e conclua as etapas da loja. Depois use `internal` nas próximas execuções. Não reenvie um AAB cujo `versionCode` já tenha sido utilizado.
+A documentação atual do Expo permite o primeiro envio com EAS Submit. Se a Play Console exigir um primeiro envio manual ou se você preferir fazê-lo pela interface, execute o destino **`build-only`**, baixe o AAB pelo resumo da execução, envie-o em **Teste interno → Criar versão** e conclua as etapas da loja. Depois use `release` na branch desejada. Não reenvie um AAB cujo `versionCode` já tenha sido utilizado.
 
 ## 5. Ativar a publicação contínua
 
-Depois de confirmar que o envio `internal` funciona, abra **Settings → Secrets and variables → Actions → Variables** e crie a variável de repositório:
+A publicação automática está configurada com a variável de repositório em **Settings → Secrets and variables → Actions → Variables**:
 
 ```text
 PLAY_STORE_AUTOMATION_ENABLED=true
 ```
 
-Com a variável ativada, alterações em `mobile/` ou no workflow enviadas à `main` geram builds para **teste interno**. Releases públicas são disparadas por tags. Para desativar os envios automáticos, altere a variável para `false` ou remova-a; a CI continua funcionando.
+Com a variável ativada, cada push em `dev`, `alpha` ou `prod` gera build e envio ao respectivo canal. Isso inclui merges de pull requests e alterações fora de `mobile/`. Para pausar os envios automáticos, altere a variável para `false` ou remova-a; a CI continua funcionando. A criação inicial das três branches foi feita com os envios pausados; a ativação vale para os próximos pushes.
 
-Para publicar a versão inicial em produção, depois de obter acesso à produção e completar as exigências da loja:
+Exemplo de promoção das mudanças, depois de validar cada etapa e completar as exigências da loja:
 
 ```powershell
-# Na raiz do repositório, depois que a configuração estiver na main remota
-git switch main
+# Atualize o desenvolvimento
+git switch dev
 git pull --ff-only
-git tag android-v1.0.0
-git push origin android-v1.0.0
+
+# Promova para o teste fechado
+git switch alpha
+git pull --ff-only
+git merge origin/dev
+git push origin alpha
+
+# Depois de validar no teste fechado, promova para produção
+git switch prod
+git pull --ff-only
+git merge origin/alpha
+git push origin prod
 ```
 
-Para versões seguintes, altere `expo.version` em `mobile/app.json` (por exemplo, `1.0.1`), faça commit e push para `main` e envie a tag correspondente (`android-v1.0.1`). A CI rejeita tags que não correspondam à versão configurada. O perfil de envio `production` usa `track: production` e `releaseStatus: completed`, solicitando distribuição completa após a aprovação do Google. Com publicação gerenciada ativada, ainda será necessário liberar as alterações na Play Console.
+Você também pode promover por pull requests `dev` → `alpha` → `prod`. Se as branches já apontarem para o mesmo commit, um merge não cria atualização e não há novo build; para reenviar, use `Run workflow → release` na branch desejada.
+
+Para uma nova versão visível, altere `expo.version` em `mobile/app.json` (por exemplo, `1.0.1`) em `dev` e promova a mudança. Cada envio gera um AAB novo com `versionCode` único; o fluxo não reutiliza o mesmo AAB entre canais. O perfil de envio `production` usa `track: production` e `releaseStatus: completed`, solicitando distribuição completa após a aprovação do Google. Com publicação gerenciada ativada, ainda será necessário liberar as alterações na Play Console.
 
 ## Diagnóstico
 
 - **Projeto não vinculado:** rode `npx eas-cli@latest init` em `mobile/`, confira `expo.owner`/`extra.eas.projectId` e faça commit.
 - **Credenciais Android ausentes:** execute o primeiro `eas build` interativo e configure o keystore antes de tentar na CI.
 - **Google Service Account Keys cannot be set up in --non-interactive mode:** vincule a chave ao app em `eas credentials --platform android`; a CI não solicita credenciais interativamente.
-- **App em rascunho aceita apenas versões em rascunho:** use `bootstrap` e conclua o lançamento inicial na Play Console antes de usar `internal`/`production`.
+- **App em rascunho aceita apenas versões em rascunho:** use `bootstrap` em `dev` e conclua o lançamento inicial na Play Console antes de usar `release` ou os pushes automáticos.
+- **Teste fechado indisponível:** configure os testadores e a disponibilidade do canal `alpha` na Play Console antes de publicar por essa branch.
 - **403 / acesso negado:** confira API habilitada, convite aceito, permissões da conta de serviço para o app e acesso do token Expo à organização.
 - **Version code already used:** sincronize o maior código com `eas build:version:set --platform android` e gere outro build.
 - **Produção indisponível:** conclua cadastro, testes e pedido de acesso indicados pelo Google. Reexecutar a CI não libera a conta.

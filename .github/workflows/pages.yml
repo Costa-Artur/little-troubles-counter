@@ -1,9 +1,9 @@
-# Publica o app (versão web do Expo, pasta mobile/) no GitHub Pages a cada push na main.
+# Publica o app (versão web do Expo, pasta mobile/) no GitHub Pages a cada push na prod.
 name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [prod]
   workflow_dispatch:
 
 permissions:
@@ -17,6 +17,7 @@ concurrency:
 
 jobs:
   build:
+    if: github.ref == 'refs/heads/prod'
     runs-on: ubuntu-latest
     defaults:
       run:

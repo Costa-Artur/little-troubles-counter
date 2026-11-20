@@ -29,6 +29,12 @@
         "releaseStatus": "completed"
       }
     },
+    "alpha": {
+      "android": {
+        "track": "alpha",
+        "releaseStatus": "completed"
+      }
+    },
     "production": {
       "android": {
         "track": "production",

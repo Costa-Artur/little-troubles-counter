@@ -2,28 +2,24 @@ name: Android CI and Play Store
 
 on:
   pull_request:
+    branches: [prod, dev, alpha]
     paths:
       - 'mobile/**'
       - '.github/workflows/mobile.yml'
   push:
-    branches: [main]
-    tags: ['android-v*']
-    paths:
-      - 'mobile/**'
-      - '.github/workflows/mobile.yml'
+    branches: [prod, dev, alpha]
   workflow_dispatch:
     inputs:
       destination:
-        description: 'Verify Expo access, build only, first draft, internal testing, or production'
+        description: 'Release to this branch channel, verify access, build only, or first draft (dev)'
         required: true
-        default: bootstrap
+        default: verify
         type: choice
         options:
           - verify
           - build-only
           - bootstrap
-          - internal
-          - production
+          - release
 
 permissions:
   contents: read
@@ -54,7 +50,7 @@ jobs:
   publish:
     name: Build and submit Android
     needs: check
-    # Enable automatic pushes/tags only after account and store setup is complete.
+    # Set this repository variable to false to pause automatic branch releases.
     # Manual runs remain available for the first build and draft submission.
     if: >-
       github.event_name == 'workflow_dispatch' ||
@@ -62,7 +58,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 120
     concurrency:
-      group: android-play-store
+      group: android-play-store-${{ github.ref_name }}
       cancel-in-progress: false
     defaults:
       run:
@@ -86,27 +82,37 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          destination="${REQUESTED_DESTINATION:-internal}"
-          if [[ "$GITHUB_REF" == refs/tags/android-v* ]]; then
-            destination=production
-            version=$(node -p "require('./app.json').expo.version")
-            if [[ "$GITHUB_REF_NAME" != "android-v$version" ]]; then
-              echo "::error::The tag must be android-v$version to match mobile/app.json."
+          case "$GITHUB_REF" in
+            refs/heads/prod) destination=production ;;
+            refs/heads/dev) destination=internal ;;
+            refs/heads/alpha) destination=alpha ;;
+            *)
+              echo '::error::Select the prod, dev, or alpha branch.'
               exit 1
-            fi
-          fi
-          if [[ "$destination" == production ]]; then
-            git merge-base --is-ancestor HEAD origin/main || {
-              echo '::error::Production releases must use a commit already on main.'
+              ;;
+          esac
+          case "${REQUESTED_DESTINATION:-release}" in
+            release) ;;
+            verify|build-only) destination="$REQUESTED_DESTINATION" ;;
+            bootstrap)
+              if [[ "$GITHUB_REF" != refs/heads/dev ]]; then
+                echo '::error::The bootstrap draft is only available on dev.'
+                exit 1
+              fi
+              destination=bootstrap
+              ;;
+            *)
+              echo '::error::Unknown workflow destination.'
               exit 1
-            }
-          fi
+              ;;
+          esac
           if [[ -z "$EXPO_TOKEN" ]]; then
             echo '::error::Configure the EXPO_TOKEN repository secret. See mobile/PUBLISHING.md.'
             exit 1
           fi
           node -e "const app = require('./app.json').expo; if (!app.extra?.eas?.projectId) { console.error('Run npx eas-cli@latest init in mobile/ and commit app.json. See mobile/PUBLISHING.md.'); process.exit(1); }"
           echo "destination=$destination" >> "$GITHUB_OUTPUT"
+          echo "Branch: $GITHUB_REF_NAME; destination: $destination" >> "$GITHUB_STEP_SUMMARY"
       - run: npm ci
       - uses: expo/expo-github-action@v8
         with:

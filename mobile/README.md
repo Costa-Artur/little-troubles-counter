@@ -28,7 +28,7 @@ Para testar no navegador: `npx expo start --web`.
 
 ## Site (GitHub Pages)
 
-O mesmo app vira um site em https://nickowolf.github.io/little-troubles-counter/. A cada push na `main`, o GitHub Actions (`.github/workflows/pages.yml`) roda `npx expo export -p web` e publica a pasta `dist`. O caminho do site está em `app.json` (`experiments.baseUrl`), e os arquivos de instalação (manifest, ícones e o service worker para uso offline) ficam em `public/`.
+O mesmo app vira um site em https://nickowolf.github.io/little-troubles-counter/. A cada push na `prod`, o GitHub Actions (`.github/workflows/pages.yml`) roda `npx expo export -p web` e publica a pasta `dist`. O caminho do site está em `app.json` (`experiments.baseUrl`), e os arquivos de instalação (manifest, ícones e o service worker para uso offline) ficam em `public/`.
 
 Para testar o site localmente: `npx expo export -p web` e sirva a pasta `dist` dentro de uma pasta `little-troubles-counter`.
 
@@ -38,10 +38,11 @@ O passo a passo completo está em **[PUBLISHING.md](PUBLISHING.md)**: conta Goog
 
 - Projeto Expo: `@wcrdesign/lt-counter`; pacote Android: `pet.nick.ltcounter`.
 - A CI em `.github/workflows/mobile.yml` verifica lint, TypeScript, dependências e bundle Android.
-- Depois de ativada, cada alteração em `mobile/` na `main` gera AAB e envia para **teste interno**; tags `android-vX.Y.Z` enviam para **produção**.
+- Cada push em `dev` gera AAB e envia para **teste interno**; em `alpha`, para **teste fechado** (canal `alpha`); em `prod`, para **produção**.
+- `dev` é a branch padrão. Promova as mudanças de `dev` para `alpha` e depois para `prod` por merge ou pull request. O site público acompanha `prod`.
 - O modo manual `bootstrap` envia um rascunho inicial; `build-only` gera apenas o AAB.
 - O EAS gerencia o `versionCode` remotamente. A versão visível continua em `app.json`.
-- A automação depende de `EXPO_TOKEN` nos secrets do GitHub e de `PLAY_STORE_AUTOMATION_ENABLED=true` nas variáveis do repositório. As chaves Google e Android ficam no Expo.
+- A automação usa `EXPO_TOKEN` nos secrets do GitHub e `PLAY_STORE_AUTOMATION_ENABLED=true` nas variáveis do repositório. Para pausar os envios automáticos, altere a variável para `false`. As chaves Google e Android ficam no Expo.
 
 ## Estrutura
 
