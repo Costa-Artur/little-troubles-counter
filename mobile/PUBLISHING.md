@@ -66,6 +66,15 @@ O `eas.json` usa `appVersionSource: remote` e `autoIncrement: true`. O EAS contr
 
 O primeiro AAB do LT Counter já foi enviado com sucesso como rascunho no teste interno. Conclua as tarefas do app e essa versão na Play Console para permitir os próximos envios com `releaseStatus: completed`. Configure também a disponibilidade do teste fechado e o acesso à produção antes de promover mudanças para esses canais.
 
+O teste interno pode estar disponível enquanto o cadastro geral do app ainda é considerado rascunho pelo Google. Nesse estado, o envio normal para `alpha` com `releaseStatus: completed` é recusado. Para enviar o primeiro AAB ao teste fechado como rascunho, use o perfil `alpha-draft`, reaproveitando o ID do build concluído que aparece no log da CI:
+
+```powershell
+# Dentro de mobile/; substitua ID_DO_BUILD pelo UUID exibido no log
+npx eas-cli@latest submit --platform android --profile alpha-draft --id ID_DO_BUILD --non-interactive --wait
+```
+
+Esse comando não gera outro build e não disponibiliza o rascunho aos testadores. Na Play Console, conclua as tarefas pendentes do painel do app, configure o teste fechado e finalize o envio da versão para análise/liberação conforme indicado pelo Google. Após sair do estado de rascunho, os próximos pushes em `alpha` usam o perfil normal `alpha` com `releaseStatus: completed`.
+
 Contas pessoais novas podem precisar de teste fechado antes de pedir acesso à produção. Confira os requisitos exibidos na sua Play Console: **teste interno não substitui teste fechado**. A CI pode enviar para teste interno enquanto o acesso à produção ainda não estiver liberado. [Requisitos de testes do Google](https://support.google.com/googleplay/android-developer/answer/14151465).
 
 ## 3. Autorizar o EAS a enviar para o Google Play
@@ -137,6 +146,7 @@ Para uma nova versão visível, altere `expo.version` em `mobile/app.json` (por 
 - **Credenciais Android ausentes:** execute o primeiro `eas build` interativo e configure o keystore antes de tentar na CI.
 - **Google Service Account Keys cannot be set up in --non-interactive mode:** vincule a chave ao app em `eas credentials --platform android`; a CI não solicita credenciais interativamente.
 - **App em rascunho aceita apenas versões em rascunho:** use `bootstrap` em `dev` e conclua o lançamento inicial na Play Console antes de usar `release` ou os pushes automáticos.
+- **Esse erro ao enviar para `alpha`:** reaproveite o build com o perfil `alpha-draft`, conforme a seção de configuração da Play Console. Conclua também o cadastro geral do app; a disponibilidade do teste interno não garante que o teste fechado ou a produção já estejam liberados.
 - **Teste fechado indisponível:** configure os testadores e a disponibilidade do canal `alpha` na Play Console antes de publicar por essa branch.
 - **403 / acesso negado:** confira API habilitada, convite aceito, permissões da conta de serviço para o app e acesso do token Expo à organização.
 - **Version code already used:** sincronize o maior código com `eas build:version:set --platform android` e gere outro build.
