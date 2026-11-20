@@ -14,11 +14,12 @@ on:
   workflow_dispatch:
     inputs:
       destination:
-        description: 'Build only, first draft, internal testing, or public production release'
+        description: 'Verify Expo access, build only, first draft, internal testing, or production'
         required: true
         default: bootstrap
         type: choice
         options:
+          - verify
           - build-only
           - bootstrap
           - internal
@@ -111,7 +112,12 @@ jobs:
         with:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
+      - name: Verify Expo project access
+        run: |
+          eas project:info
+          echo 'Expo authentication and project access verified. Build and submission run only for the selected release destinations.' >> "$GITHUB_STEP_SUMMARY"
       - name: Build signed AAB and wait for completion
+        if: steps.release.outputs.destination != 'verify'
         id: build
         shell: bash
         run: |
@@ -129,7 +135,7 @@ jobs:
             `### Android build\n\nBuild ID: ${build.id}\n\n[AAB](${build.artifacts.buildUrl})\n`);
           NODE
       - name: Submit this build to Google Play and wait for completion
-        if: steps.release.outputs.destination != 'build-only'
+        if: steps.release.outputs.destination != 'build-only' && steps.release.outputs.destination != 'verify'
         env:
           BUILD_ID: ${{ steps.build.outputs.id }}
           SUBMIT_PROFILE: ${{ steps.release.outputs.destination }}

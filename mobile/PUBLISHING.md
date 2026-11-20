@@ -11,6 +11,7 @@ O workflow está em [`.github/workflows/mobile.yml`](../.github/workflows/mobile
 | Pull request que altera `mobile/` ou o workflow | Lint, TypeScript, compatibilidade de dependências Expo e exportação do bundle Android; sem credenciais. |
 | Push na `main` que altera esses arquivos | Mesmas verificações; com a automação ativada, gera AAB e envia para **teste interno**. |
 | Push da tag `android-vX.Y.Z` | Verifica, gera AAB e envia para **produção**; exige automação ativada, versão igual à de `app.json` e commit presente na `main`. |
+| Execução manual: `verify` | Verifica a autenticação do token Expo e o acesso ao projeto, sem gerar AAB nem enviar à loja. |
 | Execução manual: `build-only` | Gera AAB assinado, sem enviar à loja. |
 | Execução manual: `bootstrap` | Gera AAB e envia um **rascunho no teste interno**, para configurar o primeiro lançamento. |
 | Execução manual: `internal` | Gera AAB e disponibiliza para os testadores internos configurados na Play Console. |
@@ -85,7 +86,7 @@ A chave fica armazenada no Expo, assim como o keystore. Não é necessário colo
 
 1. Crie um [token de acesso Expo](https://expo.dev/settings/access-tokens) para uma conta com acesso à organização `wcrdesign`.
 2. No [repositório GitHub](https://github.com/nickowolf/little-troubles-counter/settings/secrets/actions), abra **Settings → Secrets and variables → Actions → Secrets** e crie o secret **`EXPO_TOKEN`** com esse token.
-3. Faça commit e push da configuração, incluindo `app.json` com o `projectId` real, `eas.json` e o workflow. O workflow só aparece no menu de execução manual depois de chegar à branch padrão.
+3. Faça commit e push da configuração, incluindo `app.json` com o `projectId` real, `eas.json` e o workflow. O workflow só aparece no menu de execução manual depois de chegar à branch padrão. Execute primeiro o destino `verify` para conferir a autenticação e o acesso do token ao projeto Expo.
 4. Abra **Actions → Android CI and Play Store → Run workflow**, selecione `main` e o destino **`bootstrap`**. O link do AAB aparece no resumo da execução; o log do EAS Submit informa o resultado do envio.
 5. Na Play Console, confira o rascunho, conclua as tarefas de configuração e publique a release de teste interno para os testadores.
 
